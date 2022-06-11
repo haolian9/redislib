@@ -1,14 +1,7 @@
 import attrs
-import attr
 
 
-# # the old way
-# @attr.s
-# class Connection:
-#     _sock: str = attr.ib()
-
-# the new way
-@attrs.define
+@attrs.define(slots=False)
 class Connection:
     _sock: str
 

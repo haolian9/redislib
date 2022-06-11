@@ -15,7 +15,7 @@ from .api.redis import Redis
 from .typing import String
 
 
-@attrs.define
+@attrs.define(slots=False)
 class Scanner:
     """https://redis.io/commands/scan"""
 

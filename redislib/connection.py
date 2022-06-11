@@ -2,8 +2,8 @@ import logging
 from contextlib import AsyncExitStack, asynccontextmanager
 from typing import Awaitable, Callable
 
-import attrs
 import attr
+import attrs
 import trio
 from respy3 import Resp3Reader
 from trio import BrokenResourceError, Condition, Event, Lock, SocketStream
@@ -65,12 +65,15 @@ class Hello:
             yield self.clientname
 
 
-@attrs.define
+@attrs.define(slots=False)
 class Connection:
     _sock: SocketStream
     # TODO@haoliang since we will re-assign self.round_trip, _said_hello is really needed?
     _said_hello: bool = attrs.field(default=False)
     _protocol: Resp3Reader = attrs.field(init=False, factory=Resp3Reader)
+
+    def __hash__(self):
+        return hash(self._sock)
 
     async def hello(self, hi: Hello):
         if self._said_hello:
