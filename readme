@@ -1,8 +1,11 @@
 yet another redis client
 
-it's nothing fancy, just a wrapper of [resp3]() based on trio and aimed to redis 7.0+.
+it's nothing fancy, just a wrapper of [resp3](https://github.com/Harrison88/respy3) based on trio and aimed to redis 7.0+.
 
 todo:
-* add tests
-* add return type to each api
-* a uniq name for pypi
+* [ ] apis for set data type
+* [ ] apis for pub/sub
+* [ ] apis for lua scripting
+* [ ] tests
+* [ ] return type to each api
+* [ ] a uniq name for pypi
