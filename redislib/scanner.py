@@ -8,21 +8,22 @@ notes:
     * https://redis.io/commands/scan#why-scan-may-return-all-the-items-of-an-aggregate-data-type-in-a-single-call
 """
 
-import attr
+import attrs
+from attrs import field
 
 from .api.redis import Redis
 from .typing import String
 
 
-@attr.s
+@attrs.define
 class Scanner:
     """https://redis.io/commands/scan"""
 
-    _state: str = attr.ib(init=False, default="init")
+    _state: str = field(init=False, default="init")
     """ init -> started -> scanned -> stopped """
 
-    _cursor: bytes = attr.ib(init=False, default=b"0")
-    _stash: list = attr.ib(init=False, factory=list)
+    _cursor: bytes = field(init=False, default=b"0")
+    _stash: list = field(init=False, factory=list)
 
     def __aiter__(self):
         if self._state != "init":
@@ -72,7 +73,7 @@ class Scanner:
                 pass
 
 
-@attr.s
+@attrs.define
 class ZSCAN(Scanner):
     """
     yield score
@@ -80,11 +81,11 @@ class ZSCAN(Scanner):
     ...
     """
 
-    _redis: Redis = attr.ib()
-    _key: String = attr.ib()
-    _pattern: String = attr.ib(default=None)
+    _redis: Redis
+    _key: String
+    _pattern: String = field(default=None)
     # TODO@haoliang dynamic count
-    _count: int = attr.ib(default=None)
+    _count: int = field(default=None)
 
     async def _scan(self):
         return await self._redis.zscan(
@@ -92,18 +93,18 @@ class ZSCAN(Scanner):
         )
 
 
-@attr.s
+@attrs.define
 class SCAN(Scanner):
     """
     yield member
     ...
     """
 
-    _redis: Redis = attr.ib()
-    _pattern: String = attr.ib(default=None)
+    _redis: Redis
+    _pattern: String = field(default=None)
     # TODO@haoliang dynamic count
-    _count: int = attr.ib(default=None)
-    _type: String = attr.ib(default=None)
+    _count: int = field(default=None)
+    _type: String = field(default=None)
 
     async def _scan(self):
         return await self._redis.scan(
@@ -111,6 +112,7 @@ class SCAN(Scanner):
         )
 
 
+@attrs.define
 class HSCAN(Scanner):
     """
     yield field
@@ -118,11 +120,11 @@ class HSCAN(Scanner):
     ...
     """
 
-    _redis: Redis = attr.ib()
-    _key: String = attr.ib()
-    _pattern: String = attr.ib(default=None)
+    _redis: Redis
+    _key: String
+    _pattern: String = field(default=None)
     # TODO@haoliang dynamic count
-    _count: int = attr.ib(default=None)
+    _count: int = field(default=None)
 
     async def _scan(self):
         return await self._redis.hscan(
@@ -130,17 +132,18 @@ class HSCAN(Scanner):
         )
 
 
+@attrs.define
 class SSCAN(Scanner):
     """
     yield member
     ...
     """
 
-    _redis: Redis = attr.ib()
-    _key: String = attr.ib()
-    _pattern: String = attr.ib(default=None)
+    _redis: Redis
+    _key: String
+    _pattern: String = field(default=None)
     # TODO@haoliang dynamic count
-    _count: int = attr.ib(default=None)
+    _count: int = field(default=None)
 
     async def _scan(self):
         return await self._redis.sscan(

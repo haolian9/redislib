@@ -2,6 +2,7 @@ import logging
 from contextlib import AsyncExitStack, asynccontextmanager
 from typing import Awaitable, Callable
 
+import attrs
 import attr
 import trio
 from respy3 import Resp3Reader
@@ -44,12 +45,12 @@ class ClosedPoolError(Exception):
     ...
 
 
-@attr.s
+@attrs.define
 class Hello:
     version = 3
-    username: str = attr.ib(default=None)
-    password: str = attr.ib(default=None)
-    clientname: str = attr.ib(default=None)
+    username: str = attrs.field(default=None)
+    password: str = attrs.field(default=None)
+    clientname: str = attrs.field(default=None)
 
     def as_args(self):
         yield 3
@@ -64,12 +65,12 @@ class Hello:
             yield self.clientname
 
 
-@attr.s(hash=True)
+@attrs.define
 class Connection:
-    _sock: SocketStream = attr.ib()
+    _sock: SocketStream
     # TODO@haoliang since we will re-assign self.round_trip, _said_hello is really needed?
-    _said_hello: bool = attr.ib(default=False)
-    _protocol: Resp3Reader = attr.ib(init=False, factory=Resp3Reader)
+    _said_hello: bool = attrs.field(default=False)
+    _protocol: Resp3Reader = attrs.field(init=False, factory=Resp3Reader)
 
     async def hello(self, hi: Hello):
         if self._said_hello:
@@ -129,7 +130,7 @@ class Connection:
             await self._sock.aclose()
 
 
-@attr.s
+@attrs.define
 class Pool:
     """
     we choose AsyncExitStack to close all connections safetly:
@@ -140,15 +141,15 @@ class Pool:
     been released to pool before close.
     """
 
-    _factory: Callable[..., Awaitable["Connection"]] = attr.ib()
-    _max_num: int = attr.ib()
+    _factory: Callable[..., Awaitable["Connection"]]
+    _max_num: int
 
-    _lock: Lock = attr.ib(init=False, factory=Lock)
-    _one_available: Condition = attr.ib(init=False, factory=Condition)
-    _acquired_num: int = attr.ib(init=False, default=0)
-    _conns: set[Connection] = attr.ib(init=False, factory=set)
-    _closed: Event = attr.ib(init=False, factory=Event)
-    _exitstack: AsyncExitStack = attr.ib(init=False, factory=AsyncExitStack)
+    _lock: Lock = attrs.field(init=False, factory=Lock)
+    _one_available: Condition = attrs.field(init=False, factory=Condition)
+    _acquired_num: int = attrs.field(init=False, default=0)
+    _conns: set[Connection] = attrs.field(init=False, factory=set)
+    _closed: Event = attrs.field(init=False, factory=Event)
+    _exitstack: AsyncExitStack = attrs.field(init=False, factory=AsyncExitStack)
 
     async def acquire(self):
         if self._closed.is_set():
