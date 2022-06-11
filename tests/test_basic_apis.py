@@ -2,9 +2,9 @@ from redislib import Redis
 
 
 async def test_ping(redis: Redis):
-    assert redis.ping() == b'OK'
+    assert await redis.ping() == b'PONG'
 
 
 async def test_mset(redis: Redis):
-    n = await redis.mset(*((str(i), i) for i in range(100)))
-    assert n == 100
+    pairs = ((str(i), str(i)) for i in range(100))
+    assert await redis.mset(*pairs) == b'OK'

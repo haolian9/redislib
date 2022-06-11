@@ -9,10 +9,11 @@ license = "MIT"
 python = "^3.10"
 trio = "^0"
 respy3 = "^0"
+attrs = "^21"
 
 [tool.poetry.dev-dependencies]
 trio-typing = "^0"
-pytest = "^6.2.5"
+pytest = "^6"
 pytest-trio = "^0"
 
 [[tool.poetry.source]]
