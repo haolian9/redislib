@@ -48,11 +48,8 @@ class Redis(
         just let users do what they want.
         """
         async with self._pool.acquire_then_release() as conn:
-            tx = Transaction(conn)
-            try:
-                yield Transaction(conn)
-            finally:
-                tx._conn = None
+            with Transaction(conn) as tx:
+                yield tx
 
     @classmethod
     def from_addr(
@@ -88,5 +85,31 @@ class Transaction(
 
     _conn: Connection
 
+    _tx_count: int = attrs.field(init=False, default=0)
+    """ +1 when multi, -1 when exec/discard """
+
     async def _round_trip(self, cmd: Cmd, *args: Arg):
         return await self._conn.round_trip(cmd, *args)
+
+    async def multi(self):
+        self._tx_count += 1
+        return await super().multi()
+
+    async def discard(self):
+        self._tx_count -= 1
+        return await super().discard()
+
+    async def exec(self):
+        self._tx_count -= 1
+        return await super().exec()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc, exc_type, tb):
+        if self._tx_count != 0:
+            raise RuntimeError("unmatched transaction acquiring and releasing")
+
+        # TODO@haoliang need to destory this dirty conn? as user can catch the
+        # RuntimeError then continue to use it
+        self._conn = None
